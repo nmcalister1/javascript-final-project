@@ -50,6 +50,18 @@
   color: white;
 }
 
+.overlay {
+  position: fixed;
+  top: auto;
+  left: auto; 
+  margin-top: 0rem;
+  width: 97.8%;
+  height: 0%;
+  z-index: 9999; /* Ensure it's above other content */
+  pointer-events: none; /* Prevent interaction with content beneath */
+  box-sizing: border-box;
+}
+
 .aTag { 
   transition: opacity .5s; 
 } 

@@ -1,4 +1,5 @@
 const template = document.querySelector("#image-template")
+const imageOverlay = document.querySelector("#image-overlay")
 const imagesContainer = document.querySelector(".grid-container")
 
 let imagesIdArray = []
@@ -69,13 +70,19 @@ $(document).ready(() => {
 
   renderImages()
 
-  
+  let currentScrollPos
   imagesContainer.addEventListener("click", e => {
     if (!e.target.matches("#img-item")) return 
-    if (countArray[0] < 2){
+    currentScrollPos = window.scrollY
+    function disableScroll() {
+      window.scrollTo(0, currentScrollPos)
+    }
   
+    window.addEventListener('scroll', disableScroll)
+    if (countArray[0] < 2){
+      
       // check the id, if the img has already been clicked and count is not yet 3, return 
-
+      
       // also check if it is a blank
       const parent = e.target.closest(".aTag")
       const imageId = parent.dataset.imageId
@@ -110,7 +117,7 @@ $(document).ready(() => {
       // check to see if the cards match and set them to appropriate side --- back or blank 
       console.log("else block")
       console.log(imageCheckArray)
-      
+      imageOverlay.classList.add("overlay")
       if (imageCheckArray[0].imageSource == imageCheckArray[1].imageSource){
         const parentOne = imageCheckArray[0].parent
         const imgElementOne = parentOne.children[0]
@@ -134,6 +141,7 @@ $(document).ready(() => {
             imgElementOne.setAttribute("src", "images/blank.png")
 
             imgElementTwo.setAttribute("src", "images/blank.png")
+            imageOverlay.classList.remove("overlay")
           }, 500)
           
         }, 500)
@@ -167,6 +175,7 @@ $(document).ready(() => {
 
             parentOne.classList.remove("removed")
             parentTwo.classList.remove("removed")
+            imageOverlay.classList.remove("overlay")
           }, 500)
           
         }, 1500)
@@ -174,9 +183,14 @@ $(document).ready(() => {
         countArray = [0]
       }
 
-
+      
       imageCheckArray = []
+      
     }
+    setTimeout(() => {
+      window.removeEventListener('scroll', disableScroll)
+    }, 100)
+    
   })
 })
 
@@ -236,9 +250,10 @@ function generateRandomId(length) {
 // When the user finds two matching cards, the cards should be hidden after one second using a sliding motion over half a second. If the cards don’t match,
 // ---- they should be faded out over half a second after two seconds and the back of the cards should be faded in over half a second
 
-
-
 // don't allow the user to click on other cards after the 3rd click untill the processes are complete 
+
+
+
 
 // Each time the user completes a game, the user’s high score should be updated and displayed and the percentage of correct selections for the game that was just completed should be calculated and displayed.
 // ---- The high score should also be stored in local storage so it can be compared against the score for the user’s next game
