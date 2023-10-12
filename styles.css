@@ -1,0 +1,74 @@
+* {
+  box-sizing: border-box;
+}
+
+.memory-header {
+  font-size: 2rem;
+  font-weight: bold;
+  color: blue;
+}
+
+.player-header,
+.highscore-header,
+.correct-header {
+  margin-left: 1rem;
+}
+
+.grid-container {
+  display: grid;
+  grid-template-columns: auto auto auto auto auto auto auto auto;
+  background-color: #ffffff;
+  padding: 10px;
+}
+.grid-item {
+  background-color: white;
+  /* border: 2px solid #0400ff; */
+  padding: 20px;
+  font-size: 30px;
+  text-align: center;
+  margin-top: 0.5rem;
+}
+
+#pname {
+  margin-left: 1.7rem;
+}
+
+.settings-btn {
+  background-color: hsl(0, 0%, 89%);
+  color: black;
+  padding: 1rem;
+  text-decoration: none;
+  border: none;
+  cursor: pointer;
+
+  transition: 100ms;
+}
+
+.settings-btn:hover,
+.settings-btn:focus {
+  background-color: hsl(233, 93%, 53%);
+  color: white;
+}
+
+.aTag { 
+  transition: opacity .5s; 
+} 
+.removed { 
+  opacity: 0; 
+}
+
+.slide-up {
+  animation: slideUp 0.5s ease forwards;
+  clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
+}
+
+/* Keyframes for the slide-up animation */
+@keyframes slideUp {
+  0% {
+    clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
+  }
+  100% {
+    clip-path: polygon(0 0, 100% 0, 100% 0, 0 0);
+  }
+}
+
