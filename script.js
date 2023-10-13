@@ -1,6 +1,12 @@
 const template = document.querySelector("#image-template")
 const imageOverlay = document.querySelector("#image-overlay")
 const imagesContainer = document.querySelector(".grid-container")
+const settingsForm = document.querySelector("#settings-form")
+const settingsName = document.querySelector("#pname")
+const settingsCardNumber = document.querySelector("#numberOfCards")
+const nameElement = document.querySelector("#player-name")
+const newGameLink = document.querySelector("#new-game")
+const gameScore = document.querySelector("#game-score")
 
 let imagesIdArray = []
 
@@ -59,6 +65,10 @@ let imagesSrcArray = [
 let countArray = [0]
 let imageDataArray = []
 let imageCheckArray = []
+let totalGuesses = [0]
+let rightGuesses = [0]
+let endGameArray = []
+let numberOfCardsArray = []
 
 $(document).ready(() => {
   $(function () {
@@ -79,9 +89,132 @@ $(document).ready(() => {
     }
   
     window.addEventListener('scroll', disableScroll)
-    if (countArray[0] < 2){
-      
+    
+    if (countArray[0] == 1){
+      console.log(countArray[0], "before we add 1")
       // check the id, if the img has already been clicked and count is not yet 3, return 
+      
+      // also check if it is a blank
+      const parent = e.target.closest(".aTag")
+      const imageId = parent.dataset.imageId
+      const image = imageDataArray.find(i => i.id === imageId)
+      if (image.hasBeenClicked == true){
+        return 
+      } else if (image.blank == true){
+        return 
+      } else {
+        console.log("clicked")
+        countArray[0] = countArray[0] + 1
+        console.log(countArray[0], "after we add 1")
+        const checkImagesData = {
+          imageSource: image.imageSrc,
+          parent,
+          id: image.id
+        }
+        imageCheckArray.push(checkImagesData)
+
+        image.hasBeenClicked = true
+        
+        parent.classList.add("removed")
+        setTimeout(() => {
+          const newImgSrc = parent.id
+          e.target.setAttribute("src", newImgSrc)
+          // parent.id = "images/back.png"
+          parent.classList.remove("removed")
+        }, 500)
+
+        // check to see if the cards match and set them to appropriate side --- back or blank 
+      totalGuesses[0] = totalGuesses[0] + 1
+      console.log("else block")
+      imageOverlay.classList.add("overlay")
+      if (imageCheckArray[0].imageSource == imageCheckArray[1].imageSource){
+        rightGuesses[0] = rightGuesses[0] + 1
+        endGameArray[0] = endGameArray[0] - 2
+        const parentOne = imageCheckArray[0].parent
+        const imgElementOne = parentOne.children[0]
+        //imgElementOne.setAttribute("src", "images/blank.png")
+        
+        const parentTwo = imageCheckArray[1].parent
+        const imgElementTwo = parentTwo.children[0]
+        //imgElementTwo.setAttribute("src", "images/blank.png")
+        // find the specific image data in imagedataarray, then change the properties 
+        imageDataArray.forEach((data) => {
+          if (data.id === imageCheckArray[0].id){
+            data.hasBeenClicked = false
+            data.blank = true
+          }
+        })
+        imageDataArray.forEach((data) => {
+          if (data.id === imageCheckArray[1].id){
+            data.hasBeenClicked = false
+            data.blank = true
+          }
+        })
+
+        setTimeout(() => {
+          parentOne.classList.add("slide-up")
+          parentTwo.classList.add("slide-up")
+          setTimeout(() => {
+            imgElementOne.setAttribute("src", "images/blank.png")
+
+            imgElementTwo.setAttribute("src", "images/blank.png")
+            imageOverlay.classList.remove("overlay")
+          }, 500)
+          
+        }, 500)
+
+        countArray = [0]
+        if (endGameArray[0] == 0){
+          endGame()
+          return 
+        }
+      } else {
+        const parentOne = imageCheckArray[0].parent
+        const imgElementOne = parentOne.children[0]
+        
+        const parentTwo = imageCheckArray[1].parent
+        const imgElementTwo = parentTwo.children[0]
+
+        imageDataArray.forEach((data) => {
+          if (data.id === imageCheckArray[0].id){
+            data.hasBeenClicked = false
+          }
+        })
+        imageDataArray.forEach((data) => {
+          if (data.id === imageCheckArray[1].id){
+            data.hasBeenClicked = false
+          }
+        })
+
+        
+        setTimeout(() => {
+          parentOne.classList.add("removed")
+          parentTwo.classList.add("removed")
+          setTimeout(() => {
+            const sourceAttributeOne = imgElementOne.getAttribute("src")
+            parentOne.setAttribute("id", sourceAttributeOne)
+            imgElementOne.setAttribute("src", "images/back.png")
+
+            const sourceAttributeTwo = imgElementTwo.getAttribute("src")
+            parentTwo.setAttribute("id", sourceAttributeTwo)
+            imgElementTwo.setAttribute("src", "images/back.png")
+
+            parentOne.classList.remove("removed")
+            parentTwo.classList.remove("removed")
+            imageOverlay.classList.remove("overlay")
+          }, 500)
+          
+        }, 1500)
+
+        countArray = [0]
+      }
+
+      
+      imageCheckArray = []
+    }
+        
+  } else {
+// check the id, if the img has already been clicked and count is not yet 3, return 
       
       // also check if it is a blank
       const parent = e.target.closest(".aTag")
@@ -112,93 +245,95 @@ $(document).ready(() => {
           parent.classList.remove("removed")
         }, 500)
       }
-      
-    } else {
-      // check to see if the cards match and set them to appropriate side --- back or blank 
-      console.log("else block")
-      console.log(imageCheckArray)
-      imageOverlay.classList.add("overlay")
-      if (imageCheckArray[0].imageSource == imageCheckArray[1].imageSource){
-        const parentOne = imageCheckArray[0].parent
-        const imgElementOne = parentOne.children[0]
-        //imgElementOne.setAttribute("src", "images/blank.png")
-        
-        const parentTwo = imageCheckArray[1].parent
-        const imgElementTwo = parentTwo.children[0]
-        //imgElementTwo.setAttribute("src", "images/blank.png")
+      setTimeout(() => {
+        window.removeEventListener('scroll', disableScroll)
+      }, 100)
+  }
+})
+  
 
-        imageCheckArray.forEach((data) => {
-          const imageId = data.id
-          const image = imageDataArray.find(i => i.id === imageId)
-          image.hasBeenClicked = false
-          image.blank = true
-        })
+  settingsForm.addEventListener("submit", e => {
+    e.preventDefault()
+    numberOfCardsArray = []
+    const name = settingsName.value 
+    const numberOfCards = settingsCardNumber.value
+    numberOfCardsArray = [parseInt(numberOfCards)]
 
-        setTimeout(() => {
-          parentOne.classList.add("slide-up")
-          parentTwo.classList.add("slide-up")
-          setTimeout(() => {
-            imgElementOne.setAttribute("src", "images/blank.png")
-
-            imgElementTwo.setAttribute("src", "images/blank.png")
-            imageOverlay.classList.remove("overlay")
-          }, 500)
-          
-        }, 500)
-
-        countArray = [0]
-      } else {
-        const parentOne = imageCheckArray[0].parent
-        const imgElementOne = parentOne.children[0]
-        
-        const parentTwo = imageCheckArray[1].parent
-        const imgElementTwo = parentTwo.children[0]
-
-        imageCheckArray.forEach((data) => {
-          const imageId = data.id
-          const image = imageDataArray.find(i => i.id === imageId)
-          image.hasBeenClicked = false
-        })
-
-        
-        setTimeout(() => {
-          parentOne.classList.add("removed")
-          parentTwo.classList.add("removed")
-          setTimeout(() => {
-            const sourceAttributeOne = imgElementOne.getAttribute("src")
-            parentOne.setAttribute("id", sourceAttributeOne)
-            imgElementOne.setAttribute("src", "images/back.png")
-
-            const sourceAttributeTwo = imgElementTwo.getAttribute("src")
-            parentTwo.setAttribute("id", sourceAttributeTwo)
-            imgElementTwo.setAttribute("src", "images/back.png")
-
-            parentOne.classList.remove("removed")
-            parentTwo.classList.remove("removed")
-            imageOverlay.classList.remove("overlay")
-          }, 500)
-          
-        }, 1500)
-
-        countArray = [0]
-      }
-
-      
-      imageCheckArray = []
-      
+    nameElement.innerText = name
+    imageDataArray = []
+    while (imagesContainer.firstChild) {
+      imagesContainer.removeChild(imagesContainer.firstChild);
     }
-    setTimeout(() => {
-      window.removeEventListener('scroll', disableScroll)
-    }, 100)
+    renderImages(numberOfCards)
+    $("#tabs").tabs("option", "active", 0)
+  })
+
+  
+
+  document.addEventListener("click", e => {
+    if (!e.target.matches("#new-game")) return 
+    e.preventDefault()
+    
+    imageDataArray = []
+    while (imagesContainer.firstChild) {
+      imagesContainer.removeChild(imagesContainer.firstChild);
+    }
+    
+    const newNumberOfCards = numberOfCardsArray[0]
+    rightGuesses[0] = 0
+    totalGuesses[0] = 0
+    endGameArray = []
+    renderImages(newNumberOfCards)
     
   })
 })
 
+function endGame(){
+  imageDataArray = []
+  imageCheckArray = []
+  while (imagesContainer.firstChild) {
+    imagesContainer.removeChild(imagesContainer.firstChild);
+  }
 
-function renderImages() {
+  // calc score 
+  const score = rightGuesses[0] / totalGuesses[0]
+  const percentageValue = (score * 100).toFixed(2) + "%"
+  gameScore.innerText = percentageValue
+  // display screen that shows score and new game link
+  
+  const newHTML = `<p>Your score for this game was ${percentageValue}</p>\n
+                    <p>Click on "New Game" to start a new game!</p> `
+  imagesContainer.innerHTML += newHTML
+  confetti({
+    particleCount: 100,
+    spread: 70,
+    origin: { y: 0.6 },
+  })
+}
+
+function checkWin(){
+  if (endGameArray[0] == 0){
+    endGame()
+  }
+}
+
+function renderImages(numberOfCards = 48) {
   // randomize the array (create a function to randomize the array) and then loop through it
-  console.log("rendered images")
-  const randomizedArrayOne = randomizeArray(imagesSrcArray)
+  const cards = parseInt(numberOfCards)
+  console.log(cards)
+  endGameArray = [cards] 
+
+  // make the slicing random
+  let newArray = []
+  if (cards == 48){
+    newArray = [...imagesSrcArray]
+    console.log(newArray, "cards == 48")
+  } else {
+    newArray = randomizeOriginalArray(cards)
+    console.log(newArray, "cards not equal to 48")
+  }
+  
+  const randomizedArrayOne = randomizeArray(newArray)
   randomizedArrayOne.forEach((image) => {
     const templateClone = template.content.cloneNode(true)
     const aTag = templateClone.querySelector(".aTag")
@@ -217,6 +352,38 @@ function renderImages() {
     imgTag.setAttribute("src", "images/back.png")
     imagesContainer.appendChild(templateClone)
   })
+}
+
+function randomizeOriginalArray(numberOfCards){
+  let randomIndexArray = []
+  let newestArray = []
+  let count = numberOfCards
+  while (count > 0){
+    // actually don't check index, check the value
+    // add the indexes to the randomIndexArray to check to see if we have already selected a random value from that index
+    const randomIndex = Math.floor(Math.random() * 47)
+    console.log(randomIndex)
+    if (isPrime(randomIndex)){
+      const image = imagesSrcArray[randomIndex]
+      newestArray.push(image)
+      newestArray.push(image)
+      count = count - 1
+      console.log(newestArray)
+    }
+  }
+  return newestArray
+}
+
+function isPrime(n) {
+  if (n <= 1) return false;
+  if (n <= 3) return true;
+  if (n % 2 === 0 || n % 3 === 0) return false;
+
+  for (let i = 5; i * i <= n; i += 6) {
+    if (n % i === 0 || n % (i + 2) === 0) return false;
+  }
+
+  return true;
 }
 
 function randomizeArray(array){
