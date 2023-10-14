@@ -130,6 +130,7 @@ $(document).ready(() => {
       if (imageCheckArray[0].imageSource == imageCheckArray[1].imageSource){
         rightGuesses[0] = rightGuesses[0] + 1
         endGameArray[0] = endGameArray[0] - 2
+        console.log(endGameArray[0])
         const parentOne = imageCheckArray[0].parent
         const imgElementOne = parentOne.children[0]
         //imgElementOne.setAttribute("src", "images/blank.png")
@@ -324,16 +325,17 @@ function renderImages(numberOfCards = 48) {
   endGameArray = [cards] 
 
   // make the slicing random
-  let newArray = []
+  let newImagesArray = []
   if (cards == 48){
-    newArray = [...imagesSrcArray]
-    console.log(newArray, "cards == 48")
+    newImagesArray = [...imagesSrcArray]
+    console.log(newImagesArray, "cards == 48")
   } else {
-    newArray = randomizeOriginalArray(cards)
-    console.log(newArray, "cards not equal to 48")
+    newImagesArray = randomizeOriginalArray(cards)
+    console.log(newImagesArray, "cards not equal to 48")
   }
   
-  const randomizedArrayOne = randomizeArray(newArray)
+  const randomizedArrayOne = randomizeArray(newImagesArray)
+  console.log(randomizedArrayOne)
   randomizedArrayOne.forEach((image) => {
     const templateClone = template.content.cloneNode(true)
     const aTag = templateClone.querySelector(".aTag")
@@ -357,33 +359,34 @@ function renderImages(numberOfCards = 48) {
 function randomizeOriginalArray(numberOfCards){
   let randomIndexArray = []
   let newestArray = []
-  let count = numberOfCards
+  let length = numberOfCards / 2
+  let count = length
+  let check = "false"
   while (count > 0){
     // actually don't check index, check the value
     // add the indexes to the randomIndexArray to check to see if we have already selected a random value from that index
+    check = "false"
     const randomIndex = Math.floor(Math.random() * 47)
-    console.log(randomIndex)
-    if (isPrime(randomIndex)){
-      const image = imagesSrcArray[randomIndex]
-      newestArray.push(image)
-      newestArray.push(image)
-      count = count - 1
-      console.log(newestArray)
+    const value = imagesSrcArray[randomIndex]
+    if (randomIndexArray.length > 0){
+      randomIndexArray.forEach((image) => {
+        if (image === value){
+          check = "true"
+          return 
+        }
+      })
     }
+    
+    if (check === "false"){
+      randomIndexArray.push(value)
+      newestArray.push(value)
+      newestArray.push(value)
+      count = count - 1
+    }
+    
   }
+  console.log(newestArray, "Newest Array")
   return newestArray
-}
-
-function isPrime(n) {
-  if (n <= 1) return false;
-  if (n <= 3) return true;
-  if (n % 2 === 0 || n % 3 === 0) return false;
-
-  for (let i = 5; i * i <= n; i += 6) {
-    if (n % i === 0 || n % (i + 2) === 0) return false;
-  }
-
-  return true;
 }
 
 function randomizeArray(array){
