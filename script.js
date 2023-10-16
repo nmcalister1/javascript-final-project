@@ -236,7 +236,7 @@ $(document).ready(() => {
         console.log(countArray[0], "after we add 1")
         const checkImagesData = {
           imageSource: image.imageSrc,
-          parent,
+          parent: parent.outerHTML,
           id: image.id,
         }
         imageCheckArray.push(checkImagesData)
@@ -267,12 +267,28 @@ $(document).ready(() => {
           endGameArray[0] = endGameArray[0] - 2
           localStorage.setItem(END_GAME_ARRAY_KEY, JSON.stringify(endGameArray))
           console.log(endGameArray[0])
-          const parentOne = imageCheckArray[0].parent
-          const imgElementOne = parentOne.children[0]
+
+          const targetImageOneId = imageCheckArray[0].id
+          const targetImageOneParent = document.querySelector(`a[data-image-id="${targetImageOneId}"]`)
+          // const parentOne = imageCheckArray[0].parent
+          // const parentOneElement = document.createElement("div")
+          // parentOneElement.innerHTML = parentOne
+          // console.log(parentOneElement)
+          const imgElementOne = targetImageOneParent.querySelector("img")
+          // const aElementOne = parentOneElement.querySelector("a")
+          
+          console.log(imgElementOne)
           //imgElementOne.setAttribute("src", "images/blank.png")
 
-          const parentTwo = imageCheckArray[1].parent
-          const imgElementTwo = parentTwo.children[0]
+          const targetImageTwoId = imageCheckArray[1].id
+          const targetImageTwoParent = document.querySelector(`a[data-image-id="${targetImageTwoId}"]`)
+          // const parentTwo = imageCheckArray[1].parent
+          // const parentTwoElement = document.createElement("div")
+          // parentTwoElement.innerHTML = parentTwo
+          // console.log(parentTwoElement)
+          const imgElementTwo = targetImageTwoParent.querySelector("img")
+          // const aElementTwo = parentTwoElement.querySelector("a")
+          // console.log(imgElementOne)
           //imgElementTwo.setAttribute("src", "images/blank.png")
           // find the specific image data in imagedataarray, then change the properties
           imageDataArray.forEach((data) => {
@@ -294,8 +310,8 @@ $(document).ready(() => {
           console.log(imageDataArray)
 
           setTimeout(() => {
-            parentOne.classList.add("slide-up")
-            parentTwo.classList.add("slide-up")
+            targetImageOneParent.classList.add("slide-up")
+            targetImageTwoParent.classList.add("slide-up")
             setTimeout(() => {
               imgElementOne.setAttribute("src", "images/blank.png")
 
@@ -303,6 +319,8 @@ $(document).ready(() => {
               imageOverlay.classList.remove("overlay")
             }, 500)
           }, 500)
+
+          // save the new a element to check array, render it in render, and call render here
 
           countArray = [0]
           localStorage.setItem(COUNT_ARRAY_KEY, JSON.stringify(countArray))
@@ -312,11 +330,25 @@ $(document).ready(() => {
           }
         } else {
           console.log(imageCheckArray, "image check array")
-          const parentOne = imageCheckArray[0].parent
-          const imgElementOne = parentOne.children[0]
+          const targetImageOneId = imageCheckArray[0].id
+          const targetImageOneParent = document.querySelector(`a[data-image-id="${targetImageOneId}"]`)
+          // const parentOne = imageCheckArray[0].parent
+          // const parentOneElement = document.createElement("div")
+          // parentOneElement.innerHTML = parentOne
+          // console.log(parentOneElement)
+          const imgElementOne = targetImageOneParent.querySelector("img")
+          // const aElementOne = parentOneElement.querySelector("a")
+          // console.log(aElementOne)
 
-          const parentTwo = imageCheckArray[1].parent
-          const imgElementTwo = parentTwo.children[0]
+          const targetImageTwoId = imageCheckArray[1].id
+          const targetImageTwoParent = document.querySelector(`a[data-image-id="${targetImageTwoId}"]`)
+          // const parentTwo = imageCheckArray[1].parent
+          // const parentTwoElement = document.createElement("div")
+          // parentTwoElement.innerHTML = parentTwo
+          // console.log(parentTwoElement)
+          const imgElementTwo = targetImageTwoParent.querySelector("img")
+          // const aElementTwo = parentTwoElement.querySelector("a")
+          // console.log(imgElementTwo)
 
           imageDataArray.forEach((data) => {
             if (data.id === imageCheckArray[0].id) {
@@ -334,19 +366,19 @@ $(document).ready(() => {
           )
 
           setTimeout(() => {
-            parentOne.classList.add("removed")
-            parentTwo.classList.add("removed")
+            targetImageOneParent.classList.add("removed")
+            targetImageTwoParent.classList.add("removed")
             setTimeout(() => {
               const sourceAttributeOne = imgElementOne.getAttribute("src")
-              parentOne.setAttribute("id", sourceAttributeOne)
+              targetImageOneParent.setAttribute("id", sourceAttributeOne)
               imgElementOne.setAttribute("src", "images/back.png")
 
               const sourceAttributeTwo = imgElementTwo.getAttribute("src")
-              parentTwo.setAttribute("id", sourceAttributeTwo)
+              targetImageTwoParent.setAttribute("id", sourceAttributeTwo)
               imgElementTwo.setAttribute("src", "images/back.png")
 
-              parentOne.classList.remove("removed")
-              parentTwo.classList.remove("removed")
+              targetImageOneParent.classList.remove("removed")
+              targetImageTwoParent.classList.remove("removed")
               imageOverlay.classList.remove("overlay")
             }, 500)
           }, 1500)
@@ -379,7 +411,7 @@ $(document).ready(() => {
         console.log(countArray[0])
         const checkImagesData = {
           imageSource: image.imageSrc,
-          parent,
+          parent: parent.outerHTML,
           id: image.id,
         }
         imageCheckArray.push(checkImagesData)
@@ -555,25 +587,31 @@ function renderImages(numberOfCards = 48) {
   } else {
     console.log(imageDataArray, "image data array")
     console.log(imageCheckArray, "image check array")
+    // this is supposses to render new things to screen, so get rid of empty array or do clone node, query select is not available otherwise
     imageDataArray.forEach((image) => {
-      const templateClone = template.content.cloneNode(true)
-      const aTag = templateClone.querySelector(".aTag")
-      const imgTag = templateClone.querySelector("#img-item")
-      aTag.dataset.imageId = image.id
+      const targetId = image.id
+      const targetParent = document.querySelector(`a[data-image-id="${targetId}"]`)
+      console.log(targetParent)
+      const imgTag = targetParent.querySelector("img")
+      console.log(imgTag)
+      // const templateClone = template.content.cloneNode(true)
+      // const aTag = templateClone.querySelector(".aTag")
+      // const imgTag = templateClone.querySelector("#img-item")
+      // aTag.dataset.imageId = image.id
       if (image.blank) {
         console.log("is blank")
-        aTag.setAttribute("id", "")
+        targetParent.setAttribute("id", "")
         imgTag.setAttribute("src", "images/blank.png")
       } else if (image.hasBeenClicked) {
-        aTag.setAttribute("id", "images/back.png")
+        targetParent.setAttribute("id", "images/back.png")
         imgTag.setAttribute("src", image.imageSrc)
       } else {
-        aTag.setAttribute("id", image.imageSrc)
+        targetParent.setAttribute("id", image.imageSrc)
         imgTag.setAttribute("src", "images/back.png")
       }
 
-      imagesContainer.appendChild(templateClone)
-      console.log(imagesContainer)
+      // imagesContainer.appendChild(templateClone)
+      // console.log(imagesContainer)
     })
     // save child to checkimagearray
     // keep the name, high score, and score the same
