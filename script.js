@@ -7,6 +7,7 @@ const settingsCardNumber = document.querySelector("#numberOfCards")
 const nameElement = document.querySelector("#player-name")
 const newGameLink = document.querySelector("#new-game")
 const gameScore = document.querySelector("#game-score")
+const highScoreElement = document.querySelector("#high-score")
 
 let imagesIdArray = []
 
@@ -69,6 +70,7 @@ let totalGuesses = [0]
 let rightGuesses = [0]
 let endGameArray = []
 let numberOfCardsArray = []
+let nameArray = []
 
 $(document).ready(() => {
   $(function () {
@@ -255,12 +257,23 @@ $(document).ready(() => {
 
   settingsForm.addEventListener("submit", e => {
     e.preventDefault()
+    nameElement.innerText = ""
+    highScoreElement.innerText = ""
+    gameScore.innerText = ""
     numberOfCardsArray = []
+    nameArray = []
     const name = settingsName.value 
+    const highScoreObject = {
+      name, 
+      highScore: 0
+    }
+    nameArray.push(highScoreObject)
     const numberOfCards = settingsCardNumber.value
     numberOfCardsArray = [parseInt(numberOfCards)]
 
     nameElement.innerText = name
+    const obj = nameArray.find(n => n.name === nameElement.innerText)
+    highScoreElement.innerText = obj.highScore
     imageDataArray = []
     while (imagesContainer.firstChild) {
       imagesContainer.removeChild(imagesContainer.firstChild);
@@ -298,6 +311,23 @@ function endGame(){
 
   // calc score 
   const score = rightGuesses[0] / totalGuesses[0]
+  const baseScore = (score * 100).toFixed(2)
+  // see if the user has history in local storage, see if the high score is less than this high score, than update the high score or don't
+  let highScoreText 
+  const obj = nameArray.find(n => n.name === nameElement.innerText)
+  console.log(obj, "obj name object")
+  
+  if (baseScore > obj.highScore){
+    console.log("baseScore is greater than obj.highscore")
+    obj.highScore = baseScore
+    highScoreText = baseScore + "%"
+  } else {
+    highScoreText = obj.highScore + "%"
+  }
+
+  highScoreElement.innerText = highScoreText
+
+
   const percentageValue = (score * 100).toFixed(2) + "%"
   gameScore.innerText = percentageValue
   // display screen that shows score and new game link
@@ -410,6 +440,15 @@ function generateRandomId(length) {
   return randomId
 }
 
+function loadHighScore(){
+  const highScoreString = localStorage.getItem("MEMORYGAME_highScore")
+  return JSON.parse(highScoreString) || "empty"
+}
+
+function saveHighScore(highScore){
+  localStorage.setItem("MEMORYGAME_highScore", JSON.stringify(highScore))
+}
+
 
 // When the user clicks on a card whose back is displayed,
 // ---- the back of the card should be faded out over half a second and the front of the card should be faded in over half a second
@@ -422,13 +461,13 @@ function generateRandomId(length) {
 
 // don't allow the user to click on other cards after the 3rd click untill the processes are complete 
 
+// When the game ends, the user can click the New Game link to start another game
+
 
 
 
 // Each time the user completes a game, the user’s high score should be updated and displayed and the percentage of correct selections for the game that was just completed should be calculated and displayed.
 // ---- The high score should also be stored in local storage so it can be compared against the score for the user’s next game
-
-// When the game ends, the user can click the New Game link to start another game
 
 // When the user clicks the Save Settings button, the player name and number of cards should be saved in session storage.
 // ---- In addition, the page should be reloaded so the player’s name, the player’s high score if previous games have been played, and the correct number of cards are displayed.
