@@ -71,56 +71,77 @@ let rightGuesses = [0]
 let endGameArray = []
 let numberOfCardsArray = []
 let nameArray = []
+let currentNameScore = []
+let currNameAndHighScore = []
+let saveGameArray = [0]
 
 const LOCAL_STORAGE_ACCOUNT_PREFIX = "MEMORY_GAME_LOCAL"
 const SESSION_STORAGE_ACCOUNT_PREFIX = "MEMORY_GAME_SESSION"
-const COUNT_ARRAY_KEY = `${LOCAL_STORAGE_ACCOUNT_PREFIX}-countArray`
-const IMAGE_DATA_ARRAY_KEY = `${LOCAL_STORAGE_ACCOUNT_PREFIX}-imageDataArray`
-const IMAGE_CHECK_ARRAY_KEY = `${LOCAL_STORAGE_ACCOUNT_PREFIX}-imageCheckArray`
-const TOTAL_GUESSES_KEY = `${LOCAL_STORAGE_ACCOUNT_PREFIX}-totalGuessesArray`
-const RIGHT_GUESSES_KEY = `${LOCAL_STORAGE_ACCOUNT_PREFIX}-rightGuessesArray`
-const END_GAME_ARRAY_KEY = `${LOCAL_STORAGE_ACCOUNT_PREFIX}-endGameArray`
-const NUMBER_OF_CARDS_ARRAY_KEY = `${LOCAL_STORAGE_ACCOUNT_PREFIX}-numberOfCardsArray`
+const COUNT_ARRAY_KEY = `${SESSION_STORAGE_ACCOUNT_PREFIX}-countArray`
+const IMAGE_DATA_ARRAY_KEY = `${SESSION_STORAGE_ACCOUNT_PREFIX}-imageDataArray`
+const IMAGE_CHECK_ARRAY_KEY = `${SESSION_STORAGE_ACCOUNT_PREFIX}-imageCheckArray`
+const TOTAL_GUESSES_KEY = `${SESSION_STORAGE_ACCOUNT_PREFIX}-totalGuessesArray`
+const RIGHT_GUESSES_KEY = `${SESSION_STORAGE_ACCOUNT_PREFIX}-rightGuessesArray`
+const END_GAME_ARRAY_KEY = `${SESSION_STORAGE_ACCOUNT_PREFIX}-endGameArray`
+const NUMBER_OF_CARDS_ARRAY_KEY = `${SESSION_STORAGE_ACCOUNT_PREFIX}-numberOfCardsArray`
 const NAME_ARRAY_KEY = `${LOCAL_STORAGE_ACCOUNT_PREFIX}-nameArray`
+const CURRENT_NAME_SCORE_ARRAY_KEY = `${SESSION_STORAGE_ACCOUNT_PREFIX}-currentNameScoreArray`
+const CURRENT_NAME_AND_HIGH_SCORE_ARRAY_KEY = `${SESSION_STORAGE_ACCOUNT_PREFIX}-currentNameAndHighScoreArray`
+const SAVE_GAME_ARRAY_KEY = `${SESSION_STORAGE_ACCOUNT_PREFIX}-saveGameArray`
 
 function loadCountArrayData() {
-  const storedData = localStorage.getItem(COUNT_ARRAY_KEY)
+  const storedData = sessionStorage.getItem(COUNT_ARRAY_KEY)
   return JSON.parse(storedData)
 }
 
 function loadImageArrayData() {
-  const storedData = localStorage.getItem(IMAGE_DATA_ARRAY_KEY)
+  const storedData = sessionStorage.getItem(IMAGE_DATA_ARRAY_KEY)
   return JSON.parse(storedData) || []
 }
 
 function loadImageCheckData() {
-  const storedData = localStorage.getItem(IMAGE_CHECK_ARRAY_KEY)
+  const storedData = sessionStorage.getItem(IMAGE_CHECK_ARRAY_KEY)
   return JSON.parse(storedData) || []
 }
 
 function loadTotalGuessesArrayData() {
-  const storedData = localStorage.getItem(TOTAL_GUESSES_KEY)
+  const storedData = sessionStorage.getItem(TOTAL_GUESSES_KEY)
   return JSON.parse(storedData)
 }
 
 function loadRightGuessesArrayData() {
-  const storedData = localStorage.getItem(RIGHT_GUESSES_KEY)
+  const storedData = sessionStorage.getItem(RIGHT_GUESSES_KEY)
   return JSON.parse(storedData)
 }
 
 function loadEndGameArrayData() {
-  const storedData = localStorage.getItem(END_GAME_ARRAY_KEY)
+  const storedData = sessionStorage.getItem(END_GAME_ARRAY_KEY)
   return JSON.parse(storedData) || []
 }
 
 function loadNumberOfCardsArrayData() {
-  const storedData = localStorage.getItem(NUMBER_OF_CARDS_ARRAY_KEY)
+  const storedData = sessionStorage.getItem(NUMBER_OF_CARDS_ARRAY_KEY)
   return JSON.parse(storedData) || []
 }
 
 function loadNameArrayData() {
   const storedData = localStorage.getItem(NAME_ARRAY_KEY)
   return JSON.parse(storedData) || []
+}
+
+function loadCurrentNameScoreArrayData() {
+  const storedData = sessionStorage.getItem(CURRENT_NAME_SCORE_ARRAY_KEY)
+  return JSON.parse(storedData) || []
+}
+
+function loadCurrentNameAndHighScoreArrayData() {
+  const storedData = sessionStorage.getItem(CURRENT_NAME_AND_HIGH_SCORE_ARRAY_KEY)
+  return JSON.parse(storedData) || []
+}
+
+function loadSaveGameArrayData() {
+  const storedData = sessionStorage.getItem(SAVE_GAME_ARRAY_KEY)
+  return JSON.parse(storedData)
 }
 
 const clickCount = loadCountArrayData()
@@ -131,15 +152,9 @@ const rightGuessesStorage = loadRightGuessesArrayData()
 const endGameStorage = loadEndGameArrayData()
 const numberOfCardsStorage = loadNumberOfCardsArrayData()
 const nameStorage = loadNameArrayData()
-
-// let countArray = loadCountArrayData()
-// let imageDataArray = loadImageArrayData()
-// let imageCheckArray = loadImageCheckData()
-// let totalGuesses = loadTotalGuessesArrayData()
-// let rightGuesses = loadRightGuessesArrayData()
-// let endGameArray = loadEndGameArrayData()
-// let numberOfCardsArray = loadNumberOfCardsArrayData()
-// let nameArray = loadNameArrayData()
+const currentNameScoreStorage = loadCurrentNameScoreArrayData()
+const currentNameAndHighScoreStorage = loadCurrentNameAndHighScoreArrayData()
+const saveGameStorage = loadSaveGameArrayData()
 
 if (clickCount != null) {
   const count = clickCount[0]
@@ -197,6 +212,25 @@ if (nameStorage != null) {
   }
 }
 
+if (currentNameScoreStorage != null) {
+  currentNameScore.push(currentNameScoreStorage[0])
+}
+
+if (currentNameAndHighScoreStorage != null) {
+  for (let i = 0; i < currentNameAndHighScoreStorage.length; i++) {
+    const nameScoreObj = {
+      name: currentNameAndHighScoreStorage[i].name,
+      highScore: currentNameAndHighScoreStorage[i].highScore,
+    }
+    currNameAndHighScore.push(nameScoreObj)
+  }
+}
+
+if (saveGameStorage != null) {
+  const saveGame = saveGameStorage[0]
+  saveGameArray[0] = saveGame
+}
+
 $(document).ready(() => {
   $(function () {
     $("#tabs").tabs()
@@ -206,6 +240,7 @@ $(document).ready(() => {
   })
 
   renderImages()
+  
 
   let currentScrollPos
   imagesContainer.addEventListener("click", (e) => {
@@ -232,7 +267,7 @@ $(document).ready(() => {
       } else {
         console.log("clicked")
         //countArray[0] = countArray[0] + 1
-        //localStorage.setItem(COUNT_ARRAY_KEY, JSON.stringify(countArray))
+        //sessionStorage.setItem(COUNT_ARRAY_KEY, JSON.stringify(countArray))
         console.log(countArray[0], "after we add 1")
         const checkImagesData = {
           imageSource: image.imageSrc,
@@ -240,13 +275,14 @@ $(document).ready(() => {
           id: image.id,
         }
         imageCheckArray.push(checkImagesData)
-        localStorage.setItem(
+        sessionStorage.setItem(
           IMAGE_CHECK_ARRAY_KEY,
           JSON.stringify(imageCheckArray)
         )
         console.log(imageCheckArray, "image check array")
 
         image.hasBeenClicked = true
+        
 
         parent.classList.add("removed")
         setTimeout(() => {
@@ -258,14 +294,14 @@ $(document).ready(() => {
 
         // check to see if the cards match and set them to appropriate side --- back or blank
         totalGuesses[0] = totalGuesses[0] + 1
-        localStorage.setItem(TOTAL_GUESSES_KEY, JSON.stringify(totalGuesses))
+        sessionStorage.setItem(TOTAL_GUESSES_KEY, JSON.stringify(totalGuesses))
         console.log("else block")
         imageOverlay.classList.add("overlay")
         if (imageCheckArray[0].imageSource == imageCheckArray[1].imageSource) {
           rightGuesses[0] = rightGuesses[0] + 1
-          localStorage.setItem(RIGHT_GUESSES_KEY, JSON.stringify(rightGuesses))
+          sessionStorage.setItem(RIGHT_GUESSES_KEY, JSON.stringify(rightGuesses))
           endGameArray[0] = endGameArray[0] - 2
-          localStorage.setItem(END_GAME_ARRAY_KEY, JSON.stringify(endGameArray))
+          sessionStorage.setItem(END_GAME_ARRAY_KEY, JSON.stringify(endGameArray))
           console.log(endGameArray[0])
 
           const targetImageOneId = imageCheckArray[0].id
@@ -297,13 +333,17 @@ $(document).ready(() => {
               data.blank = true
             }
           })
+          sessionStorage.setItem(
+            IMAGE_DATA_ARRAY_KEY,
+            JSON.stringify(imageDataArray)
+          )
           imageDataArray.forEach((data) => {
             if (data.id === imageCheckArray[1].id) {
               data.hasBeenClicked = false
               data.blank = true
             }
           })
-          localStorage.setItem(
+          sessionStorage.setItem(
             IMAGE_DATA_ARRAY_KEY,
             JSON.stringify(imageDataArray)
           )
@@ -323,7 +363,7 @@ $(document).ready(() => {
           // save the new a element to check array, render it in render, and call render here
 
           countArray = [0]
-          localStorage.setItem(COUNT_ARRAY_KEY, JSON.stringify(countArray))
+          sessionStorage.setItem(COUNT_ARRAY_KEY, JSON.stringify(countArray))
           if (endGameArray[0] == 0) {
             endGame()
             return
@@ -355,12 +395,16 @@ $(document).ready(() => {
               data.hasBeenClicked = false
             }
           })
+          sessionStorage.setItem(
+            IMAGE_DATA_ARRAY_KEY,
+            JSON.stringify(imageDataArray)
+          )
           imageDataArray.forEach((data) => {
             if (data.id === imageCheckArray[1].id) {
               data.hasBeenClicked = false
             }
           })
-          localStorage.setItem(
+          sessionStorage.setItem(
             IMAGE_DATA_ARRAY_KEY,
             JSON.stringify(imageDataArray)
           )
@@ -384,11 +428,11 @@ $(document).ready(() => {
           }, 1500)
 
           countArray = [0]
-          localStorage.setItem(COUNT_ARRAY_KEY, JSON.stringify(countArray))
+          sessionStorage.setItem(COUNT_ARRAY_KEY, JSON.stringify(countArray))
         }
 
         imageCheckArray = []
-        localStorage.setItem(
+        sessionStorage.setItem(
           IMAGE_CHECK_ARRAY_KEY,
           JSON.stringify(imageCheckArray)
         )
@@ -407,7 +451,7 @@ $(document).ready(() => {
       } else {
         console.log("clicked")
         countArray[0] = countArray[0] + 1
-        localStorage.setItem(COUNT_ARRAY_KEY, JSON.stringify(countArray))
+        sessionStorage.setItem(COUNT_ARRAY_KEY, JSON.stringify(countArray))
         console.log(countArray[0])
         const checkImagesData = {
           imageSource: image.imageSrc,
@@ -415,13 +459,17 @@ $(document).ready(() => {
           id: image.id,
         }
         imageCheckArray.push(checkImagesData)
-        localStorage.setItem(
+        sessionStorage.setItem(
           IMAGE_CHECK_ARRAY_KEY,
           JSON.stringify(imageCheckArray)
         )
         console.log(imageCheckArray, "image check array")
 
         image.hasBeenClicked = true
+        sessionStorage.setItem(
+          IMAGE_DATA_ARRAY_KEY,
+          JSON.stringify(imageDataArray)
+        )
 
         parent.classList.add("removed")
         setTimeout(() => {
@@ -443,26 +491,42 @@ $(document).ready(() => {
     highScoreElement.innerText = ""
     gameScore.innerText = ""
     endGameArray = []
-    localStorage.setItem(END_GAME_ARRAY_KEY, JSON.stringify(endGameArray))
+    sessionStorage.setItem(END_GAME_ARRAY_KEY, JSON.stringify(endGameArray))
+    currNameAndHighScore = []
+    sessionStorage.setItem(CURRENT_NAME_AND_HIGH_SCORE_ARRAY_KEY, JSON.stringify(currNameAndHighScore))
+    saveGameArray[0] = 0
+    sessionStorage.setItem(SAVE_GAME_ARRAY_KEY, JSON.stringify(saveGameArray))
+    // currentNameScore = []
+    // sessionStorage.setItem(CURRENT_NAME_SCORE_ARRAY_KEY, JSON.stringify(currentNameScore))
     numberOfCardsArray = []
-    localStorage.setItem(
+    sessionStorage.setItem(
       NUMBER_OF_CARDS_ARRAY_KEY,
       JSON.stringify(numberOfCardsArray)
     )
     //nameArray = []
-    //localStorage.setItem(NAME_ARRAY_KEY, JSON.stringify(nameArray))
+    //sessionStorage.setItem(NAME_ARRAY_KEY, JSON.stringify(nameArray))
     const name = settingsName.value
     const highScoreObject = {
       name,
       highScore: 0,
     }
+    // const currentScoreObj = {
+    //   name,
+    //   highScore: 0,
+    //   currentScore: 0
+    // }
     nameArray.push(highScoreObject)
     localStorage.setItem(NAME_ARRAY_KEY, JSON.stringify(nameArray))
+    currNameAndHighScore.push(highScoreObject)
+    sessionStorage.setItem(CURRENT_NAME_AND_HIGH_SCORE_ARRAY_KEY, JSON.stringify(currNameAndHighScore))
+    currentNameScore = []
+    sessionStorage.setItem(CURRENT_NAME_SCORE_ARRAY_KEY, JSON.stringify(currentNameScore))
+    
     const numberOfCards = settingsCardNumber.value
     endGameArray = [parseInt(numberOfCards)]
-    localStorage.setItem(END_GAME_ARRAY_KEY, JSON.stringify(endGameArray))
+    sessionStorage.setItem(END_GAME_ARRAY_KEY, JSON.stringify(endGameArray))
     numberOfCardsArray = [parseInt(numberOfCards)]
-    localStorage.setItem(
+    sessionStorage.setItem(
       NUMBER_OF_CARDS_ARRAY_KEY,
       JSON.stringify(numberOfCardsArray)
     )
@@ -470,8 +534,9 @@ $(document).ready(() => {
     nameElement.innerText = name
     const obj = nameArray.find((n) => n.name === nameElement.innerText)
     highScoreElement.innerText = obj.highScore
+    gameScore.innerText = currentNameScore[0]?.currentScore || 0
     imageDataArray = []
-    localStorage.setItem(IMAGE_DATA_ARRAY_KEY, JSON.stringify(imageDataArray))
+    sessionStorage.setItem(IMAGE_DATA_ARRAY_KEY, JSON.stringify(imageDataArray))
     while (imagesContainer.firstChild) {
       imagesContainer.removeChild(imagesContainer.firstChild)
     }
@@ -484,27 +549,31 @@ $(document).ready(() => {
     e.preventDefault()
 
     imageDataArray = []
-    localStorage.setItem(IMAGE_DATA_ARRAY_KEY, JSON.stringify(imageDataArray))
+    sessionStorage.setItem(IMAGE_DATA_ARRAY_KEY, JSON.stringify(imageDataArray))
     while (imagesContainer.firstChild) {
       imagesContainer.removeChild(imagesContainer.firstChild)
     }
 
     const newNumberOfCards = numberOfCardsArray[0]
     rightGuesses[0] = 0
-    localStorage.setItem(RIGHT_GUESSES_KEY, JSON.stringify(rightGuesses))
+    sessionStorage.setItem(RIGHT_GUESSES_KEY, JSON.stringify(rightGuesses))
     totalGuesses[0] = 0
-    localStorage.setItem(TOTAL_GUESSES_KEY, JSON.stringify(totalGuesses))
-    endGameArray = []
-    localStorage.setItem(END_GAME_ARRAY_KEY, JSON.stringify(endGameArray))
+    sessionStorage.setItem(TOTAL_GUESSES_KEY, JSON.stringify(totalGuesses))
+    endGameArray = [newNumberOfCards]
+    sessionStorage.setItem(END_GAME_ARRAY_KEY, JSON.stringify(endGameArray))
+    saveGameArray[0] = 0
+    sessionStorage.setItem(SAVE_GAME_ARRAY_KEY, JSON.stringify(saveGameArray))
     renderImages(newNumberOfCards)
   })
 })
 
 function endGame() {
   imageDataArray = []
-  localStorage.setItem(IMAGE_DATA_ARRAY_KEY, JSON.stringify(imageDataArray))
+  sessionStorage.setItem(IMAGE_DATA_ARRAY_KEY, JSON.stringify(imageDataArray))
   imageCheckArray = []
-  localStorage.setItem(IMAGE_CHECK_ARRAY_KEY, JSON.stringify(imageCheckArray))
+  sessionStorage.setItem(IMAGE_CHECK_ARRAY_KEY, JSON.stringify(imageCheckArray))
+  currentNameScore = []
+  sessionStorage.setItem(CURRENT_NAME_SCORE_ARRAY_KEY, JSON.stringify(currentNameScore))
   while (imagesContainer.firstChild) {
     imagesContainer.removeChild(imagesContainer.firstChild)
   }
@@ -524,6 +593,10 @@ function endGame() {
   } else {
     highScoreText = obj.highScore + "%"
   }
+  
+  localStorage.setItem(NAME_ARRAY_KEY, JSON.stringify(nameArray))
+  currentNameScore.push(baseScore + "%")
+  sessionStorage.setItem(CURRENT_NAME_SCORE_ARRAY_KEY, JSON.stringify(currentNameScore))
 
   highScoreElement.innerText = highScoreText
 
@@ -552,8 +625,9 @@ function renderImages(numberOfCards = 48) {
   const cards = endGameArray[0] || parseInt(numberOfCards)
   console.log(cards)
 
+  // endGameArray[0] == numberOfCardsArray[0]
   // need a better condition -- the user could have already flipped over cards and endGameArray[0] == numberOfCardsArray[0]
-  if (endGameArray[0] == numberOfCardsArray[0]) {
+  if (saveGameArray[0] != 1) {
     // make the slicing random
     let newImagesArray = []
 
@@ -577,44 +651,46 @@ function renderImages(numberOfCards = 48) {
         id,
       }
       imageDataArray.push(imageData)
-      localStorage.setItem(IMAGE_DATA_ARRAY_KEY, JSON.stringify(imageDataArray))
+      sessionStorage.setItem(IMAGE_DATA_ARRAY_KEY, JSON.stringify(imageDataArray))
       const imgTag = templateClone.querySelector("#img-item")
 
       aTag.setAttribute("id", image)
       imgTag.setAttribute("src", "images/back.png")
       imagesContainer.appendChild(templateClone)
     })
+    saveGameArray[0] = 1
+    sessionStorage.setItem(SAVE_GAME_ARRAY_KEY, JSON.stringify(saveGameArray))
   } else {
     console.log(imageDataArray, "image data array")
     console.log(imageCheckArray, "image check array")
     // this is supposses to render new things to screen, so get rid of empty array or do clone node, query select is not available otherwise
     imageDataArray.forEach((image) => {
-      const targetId = image.id
-      const targetParent = document.querySelector(`a[data-image-id="${targetId}"]`)
-      console.log(targetParent)
-      const imgTag = targetParent.querySelector("img")
-      console.log(imgTag)
-      // const templateClone = template.content.cloneNode(true)
-      // const aTag = templateClone.querySelector(".aTag")
-      // const imgTag = templateClone.querySelector("#img-item")
-      // aTag.dataset.imageId = image.id
+      const templateClone = template.content.cloneNode(true)
+      const aTag = templateClone.querySelector(".aTag")
+      const imgTag = templateClone.querySelector("#img-item")
+      aTag.dataset.imageId = image.id
       if (image.blank) {
         console.log("is blank")
-        targetParent.setAttribute("id", "")
+        aTag.setAttribute("id", "")
         imgTag.setAttribute("src", "images/blank.png")
       } else if (image.hasBeenClicked) {
-        targetParent.setAttribute("id", "images/back.png")
+        //aTag.setAttribute("id", "images/back.png")
         imgTag.setAttribute("src", image.imageSrc)
       } else {
-        targetParent.setAttribute("id", image.imageSrc)
+        aTag.setAttribute("id", image.imageSrc)
         imgTag.setAttribute("src", "images/back.png")
       }
 
-      // imagesContainer.appendChild(templateClone)
-      // console.log(imagesContainer)
-    })
-    // save child to checkimagearray
+      imagesContainer.appendChild(templateClone)
+    
     // keep the name, high score, and score the same
+      const obj = nameArray.find(n => n.name == currNameAndHighScore[0].name)
+      nameElement.innerText = obj.name
+      highScoreElement.innerText = obj.highScore
+      console.log(currentNameScore)
+      gameScore.innerText = currentNameScore[0] || 0
+    })
+    
   }
 }
 
