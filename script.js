@@ -242,15 +242,15 @@ $(document).ready(() => {
   renderImages()
   
 
-  let currentScrollPos
+  //let currentScrollPos
   imagesContainer.addEventListener("click", (e) => {
     if (!e.target.matches("#img-item")) return
-    currentScrollPos = window.scrollY
-    function disableScroll() {
-      window.scrollTo(0, currentScrollPos)
-    }
+    //currentScrollPos = window.scrollY
+    // function disableScroll() {
+    //   window.scrollTo(0, currentScrollPos)
+    // }
 
-    window.addEventListener("scroll", disableScroll)
+    // window.addEventListener("scroll", disableScroll)
 
     if (countArray[0] == 1) {
       console.log(countArray[0], "before we add 1")
@@ -479,14 +479,15 @@ $(document).ready(() => {
           parent.classList.remove("removed")
         }, 500)
       }
-      setTimeout(() => {
-        window.removeEventListener("scroll", disableScroll)
-      }, 100)
+      // setTimeout(() => {
+      //   window.removeEventListener("scroll", disableScroll)
+      // }, 100)
     }
   })
 
   settingsForm.addEventListener("submit", (e) => {
     e.preventDefault()
+    if (settingsName.value == "") return 
     nameElement.innerText = ""
     highScoreElement.innerText = ""
     gameScore.innerText = ""
@@ -583,18 +584,24 @@ function endGame() {
   const baseScore = (score * 100).toFixed(2)
   // see if the user has history in local storage, see if the high score is less than this high score, than update the high score or don't
   let highScoreText
-  const obj = nameArray.find((n) => n.name === nameElement.innerText)
-  console.log(obj, "obj name object")
-
-  if (baseScore > obj.highScore) {
-    console.log("baseScore is greater than obj.highscore")
-    obj.highScore = baseScore
+  if (nameElement.innerText == ""){
     highScoreText = baseScore + "%"
   } else {
-    highScoreText = obj.highScore + "%"
+    const obj = nameArray.find((n) => n.name === nameElement.innerText)
+    console.log(obj, "obj name object")
+  
+    if (baseScore > obj.highScore) {
+      console.log("baseScore is greater than obj.highscore")
+      obj.highScore = baseScore
+      highScoreText = baseScore + "%"
+    } else {
+      highScoreText = obj.highScore + "%"
+    }
+    
+    localStorage.setItem(NAME_ARRAY_KEY, JSON.stringify(nameArray))
   }
   
-  localStorage.setItem(NAME_ARRAY_KEY, JSON.stringify(nameArray))
+
   currentNameScore.push(baseScore + "%")
   sessionStorage.setItem(CURRENT_NAME_SCORE_ARRAY_KEY, JSON.stringify(currentNameScore))
 
@@ -637,6 +644,8 @@ function renderImages(numberOfCards = 48) {
       newImagesArray = randomizeOriginalArray(cards)
     }
 
+    
+
     const randomizedArrayOne = randomizeArray(newImagesArray)
     console.log(randomizedArrayOne)
     randomizedArrayOne.forEach((image) => {
@@ -663,6 +672,10 @@ function renderImages(numberOfCards = 48) {
   } else {
     console.log(imageDataArray, "image data array")
     console.log(imageCheckArray, "image check array")
+    const cards = endGameArray[0] || parseInt(numberOfCards)
+    endGameArray[0] = cards
+    console.log(cards)
+    console.log(endGameArray)
     // this is supposses to render new things to screen, so get rid of empty array or do clone node, query select is not available otherwise
     imageDataArray.forEach((image) => {
       const templateClone = template.content.cloneNode(true)
@@ -684,9 +697,9 @@ function renderImages(numberOfCards = 48) {
       imagesContainer.appendChild(templateClone)
     
     // keep the name, high score, and score the same
-      const obj = nameArray.find(n => n.name == currNameAndHighScore[0].name)
-      nameElement.innerText = obj.name
-      highScoreElement.innerText = obj.highScore
+      const obj = nameArray.find(n => n.name == currNameAndHighScore[0]?.name)
+      nameElement.innerText = obj?.name || ""
+      highScoreElement.innerText = obj?.highScore || ""
       console.log(currentNameScore)
       gameScore.innerText = currentNameScore[0] || 0
     })
