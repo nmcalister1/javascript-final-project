@@ -1,3 +1,4 @@
+// select elements from the DOM
 const template = document.querySelector("#image-template")
 const imageOverlay = document.querySelector("#image-overlay")
 const imagesContainer = document.querySelector(".grid-container")
@@ -9,9 +10,7 @@ const newGameLink = document.querySelector("#new-game")
 const gameScore = document.querySelector("#game-score")
 const highScoreElement = document.querySelector("#high-score")
 
-//let imagesIdArray = []
-
-// Render the cards randomly to the screen
+// Create an array that stores the images
 let imagesSrcArray = [
   "images/card_1.png",
   "images/card_1.png",
@@ -63,18 +62,31 @@ let imagesSrcArray = [
   "images/card_24.png",
 ]
 
+// this array keeps track of how many cards the user has clicked on 
 let countArray = [0]
+// this array keeps track of important information like whether the card is blank or has been clicked on, also has the id
 let imageDataArray = []
+// this array keeps track of important information like the image src and id
 let imageCheckArray = []
+// this array keeps track of the total number of guesses the user makes
 let totalGuesses = [0]
+// this array keeps track of the right number of guesses the user makes
 let rightGuesses = [0]
+// this array determines whether to call the endGame function and end the game 
 let endGameArray = []
+// this array stores the number of cards at the start of the game
 let numberOfCardsArray = []
+// this array stores the user name and the high score for local storage
 let nameArray = []
+// this array was named poorly but keeps track of the current high score
 let currentNameScore = []
+// this array keeps track of the current name and high score
 let currNameAndHighScore = []
+// this array determines the else if block within the render function 
 let saveGameArray = [0]
 
+
+// create keys for storage
 const LOCAL_STORAGE_ACCOUNT_PREFIX = "MEMORY_GAME_LOCAL"
 const SESSION_STORAGE_ACCOUNT_PREFIX = "MEMORY_GAME_SESSION"
 const COUNT_ARRAY_KEY = `${SESSION_STORAGE_ACCOUNT_PREFIX}-countArray`
@@ -89,6 +101,7 @@ const CURRENT_NAME_SCORE_ARRAY_KEY = `${SESSION_STORAGE_ACCOUNT_PREFIX}-currentN
 const CURRENT_NAME_AND_HIGH_SCORE_ARRAY_KEY = `${SESSION_STORAGE_ACCOUNT_PREFIX}-currentNameAndHighScoreArray`
 const SAVE_GAME_ARRAY_KEY = `${SESSION_STORAGE_ACCOUNT_PREFIX}-saveGameArray`
 
+// create functions to load all the data from session storage and local storage
 function loadCountArrayData() {
   const storedData = sessionStorage.getItem(COUNT_ARRAY_KEY)
   return JSON.parse(storedData)
@@ -156,6 +169,7 @@ const currentNameScoreStorage = loadCurrentNameScoreArrayData()
 const currentNameAndHighScoreStorage = loadCurrentNameAndHighScoreArrayData()
 const saveGameStorage = loadSaveGameArrayData()
 
+// load the information into the arrays being used in the application 
 if (clickCount != null) {
   const count = clickCount[0]
   countArray[0] = count
@@ -231,7 +245,9 @@ if (saveGameStorage != null) {
   saveGameArray[0] = saveGame
 }
 
+// now that arrays have been created and data has been properly loaded in from storage, we can begin the application
 $(document).ready(() => {
+  // create the tabs widget
   $(function () {
     $("#tabs").tabs()
   })
@@ -239,24 +255,17 @@ $(document).ready(() => {
     $("#selectable").selectable()
   })
 
+  // render images to the screen upon initial load
   renderImages()
   
-
-  //let currentScrollPos
+  // add a click event listener to the imagesContainer
   imagesContainer.addEventListener("click", (e) => {
+    // if the event does not match an image, return 
     if (!e.target.matches("#img-item")) return
-    //currentScrollPos = window.scrollY
-    // function disableScroll() {
-    //   window.scrollTo(0, currentScrollPos)
-    // }
 
-    // window.addEventListener("scroll", disableScroll)
-
+    // check to see if the count equals 1
     if (countArray[0] == 1) {
-      console.log(countArray[0], "before we add 1")
-      // check the id, if the img has already been clicked and count is not yet 3, return
-
-      // also check if it is a blank
+      // select the image that was clicked on and check if it has already been clicked on or is blank
       const parent = e.target.closest(".aTag")
       const imageId = parent.dataset.imageId
       const image = imageDataArray.find((i) => i.id === imageId)
@@ -265,10 +274,7 @@ $(document).ready(() => {
       } else if (image.blank == true) {
         return
       } else {
-        console.log("clicked")
-        //countArray[0] = countArray[0] + 1
-        //sessionStorage.setItem(COUNT_ARRAY_KEY, JSON.stringify(countArray))
-        console.log(countArray[0], "after we add 1")
+        // if the image is valid, add info to arrays
         const checkImagesData = {
           imageSource: image.imageSrc,
           parent: parent.outerHTML,
@@ -279,54 +285,44 @@ $(document).ready(() => {
           IMAGE_CHECK_ARRAY_KEY,
           JSON.stringify(imageCheckArray)
         )
-        console.log(imageCheckArray, "image check array")
 
         image.hasBeenClicked = true
         
-
+        // add the flip effect 
         parent.classList.add("removed")
         setTimeout(() => {
           const newImgSrc = parent.id
           e.target.setAttribute("src", newImgSrc)
-          // parent.id = "images/back.png"
           parent.classList.remove("removed")
         }, 500)
 
-        // check to see if the cards match and set them to appropriate side --- back or blank
+        // since the countArray equaled 1 meaning two cards have now been clicked on and revealed, we increase the totalGuesses by 1 and check to see if the cards match
         totalGuesses[0] = totalGuesses[0] + 1
         sessionStorage.setItem(TOTAL_GUESSES_KEY, JSON.stringify(totalGuesses))
-        console.log("else block")
+
+        // add an overlay so the user cannot click on anything else while this logic is being decided
         imageOverlay.classList.add("overlay")
+
+        // check to see if the cards are equal 
         if (imageCheckArray[0].imageSource == imageCheckArray[1].imageSource) {
+          // if the cards are equal, we increase right guesses by 1
           rightGuesses[0] = rightGuesses[0] + 1
           sessionStorage.setItem(RIGHT_GUESSES_KEY, JSON.stringify(rightGuesses))
+          // subtract 2 from the endGameArray
           endGameArray[0] = endGameArray[0] - 2
           sessionStorage.setItem(END_GAME_ARRAY_KEY, JSON.stringify(endGameArray))
-          console.log(endGameArray[0])
 
+          // select the first card in the dom using an id 
           const targetImageOneId = imageCheckArray[0].id
           const targetImageOneParent = document.querySelector(`a[data-image-id="${targetImageOneId}"]`)
-          // const parentOne = imageCheckArray[0].parent
-          // const parentOneElement = document.createElement("div")
-          // parentOneElement.innerHTML = parentOne
-          // console.log(parentOneElement)
           const imgElementOne = targetImageOneParent.querySelector("img")
-          // const aElementOne = parentOneElement.querySelector("a")
-          
-          console.log(imgElementOne)
-          //imgElementOne.setAttribute("src", "images/blank.png")
 
+          // select the second card in the dom using an id
           const targetImageTwoId = imageCheckArray[1].id
           const targetImageTwoParent = document.querySelector(`a[data-image-id="${targetImageTwoId}"]`)
-          // const parentTwo = imageCheckArray[1].parent
-          // const parentTwoElement = document.createElement("div")
-          // parentTwoElement.innerHTML = parentTwo
-          // console.log(parentTwoElement)
           const imgElementTwo = targetImageTwoParent.querySelector("img")
-          // const aElementTwo = parentTwoElement.querySelector("a")
-          // console.log(imgElementOne)
-          //imgElementTwo.setAttribute("src", "images/blank.png")
-          // find the specific image data in imagedataarray, then change the properties
+         
+          // update the two cards attributes in the imageDataArray to make blank == true
           imageDataArray.forEach((data) => {
             if (data.id === imageCheckArray[0].id) {
               data.hasBeenClicked = false
@@ -347,8 +343,8 @@ $(document).ready(() => {
             IMAGE_DATA_ARRAY_KEY,
             JSON.stringify(imageDataArray)
           )
-          console.log(imageDataArray)
 
+          // add the slide up effect to the two cards
           setTimeout(() => {
             targetImageOneParent.classList.add("slide-up")
             targetImageTwoParent.classList.add("slide-up")
@@ -360,36 +356,29 @@ $(document).ready(() => {
             }, 500)
           }, 500)
 
-          // save the new a element to check array, render it in render, and call render here
-
+          // reset the countArray to 0
           countArray = [0]
           sessionStorage.setItem(COUNT_ARRAY_KEY, JSON.stringify(countArray))
+
+          // check if the game has ended 
           if (endGameArray[0] == 0) {
             endGame()
             return
           }
         } else {
-          console.log(imageCheckArray, "image check array")
+          // this block runs if the two cards are not equal to eachother
+
+          // select the first card from the DOM
           const targetImageOneId = imageCheckArray[0].id
           const targetImageOneParent = document.querySelector(`a[data-image-id="${targetImageOneId}"]`)
-          // const parentOne = imageCheckArray[0].parent
-          // const parentOneElement = document.createElement("div")
-          // parentOneElement.innerHTML = parentOne
-          // console.log(parentOneElement)
           const imgElementOne = targetImageOneParent.querySelector("img")
-          // const aElementOne = parentOneElement.querySelector("a")
-          // console.log(aElementOne)
 
+          // select the second card from the DOM
           const targetImageTwoId = imageCheckArray[1].id
           const targetImageTwoParent = document.querySelector(`a[data-image-id="${targetImageTwoId}"]`)
-          // const parentTwo = imageCheckArray[1].parent
-          // const parentTwoElement = document.createElement("div")
-          // parentTwoElement.innerHTML = parentTwo
-          // console.log(parentTwoElement)
           const imgElementTwo = targetImageTwoParent.querySelector("img")
-          // const aElementTwo = parentTwoElement.querySelector("a")
-          // console.log(imgElementTwo)
 
+          // update the cards hasBeenClicked attributes within the imageDataArray to be false
           imageDataArray.forEach((data) => {
             if (data.id === imageCheckArray[0].id) {
               data.hasBeenClicked = false
@@ -409,6 +398,7 @@ $(document).ready(() => {
             JSON.stringify(imageDataArray)
           )
 
+          // add a fadeout effect and return the cards source attribute to the back.png
           setTimeout(() => {
             targetImageOneParent.classList.add("removed")
             targetImageTwoParent.classList.add("removed")
@@ -427,10 +417,12 @@ $(document).ready(() => {
             }, 500)
           }, 1500)
 
+          // reset the countArray to 0
           countArray = [0]
           sessionStorage.setItem(COUNT_ARRAY_KEY, JSON.stringify(countArray))
         }
 
+        // no matter which block runs when countArray == 1, we reset the imageCheckArray
         imageCheckArray = []
         sessionStorage.setItem(
           IMAGE_CHECK_ARRAY_KEY,
@@ -438,9 +430,9 @@ $(document).ready(() => {
         )
       }
     } else {
-      // check the id, if the img has already been clicked and count is not yet 3, return
+      // this block runs when countArray != 1
 
-      // also check if it is a blank
+      // select the image that has been clicked on and check to see if it has been clicked on or is blank
       const parent = e.target.closest(".aTag")
       const imageId = parent.dataset.imageId
       const image = imageDataArray.find((i) => i.id === imageId)
@@ -449,10 +441,10 @@ $(document).ready(() => {
       } else if (image.blank == true) {
         return
       } else {
-        console.log("clicked")
+        // if the card is valid, we update countArray to equal 1 and add important information to arrays
         countArray[0] = countArray[0] + 1
         sessionStorage.setItem(COUNT_ARRAY_KEY, JSON.stringify(countArray))
-        console.log(countArray[0])
+    
         const checkImagesData = {
           imageSource: image.imageSrc,
           parent: parent.outerHTML,
@@ -463,7 +455,6 @@ $(document).ready(() => {
           IMAGE_CHECK_ARRAY_KEY,
           JSON.stringify(imageCheckArray)
         )
-        console.log(imageCheckArray, "image check array")
 
         image.hasBeenClicked = true
         sessionStorage.setItem(
@@ -471,6 +462,7 @@ $(document).ready(() => {
           JSON.stringify(imageDataArray)
         )
 
+        // switch the source of the image from the back to the new image source and add a flip effect
         parent.classList.add("removed")
         setTimeout(() => {
           const newImgSrc = parent.id
@@ -479,15 +471,16 @@ $(document).ready(() => {
           parent.classList.remove("removed")
         }, 500)
       }
-      // setTimeout(() => {
-      //   window.removeEventListener("scroll", disableScroll)
-      // }, 100)
     }
   })
 
+  // add a submit event listener to the settings form
   settingsForm.addEventListener("submit", (e) => {
     e.preventDefault()
+    // force the user to enter a name
     if (settingsName.value == "") return 
+
+    // reset the text elements that store the name and scores as well as the endGameArray, currNameAndHighScore, saveGameArray, and numberOfCardsArray arrays 
     nameElement.innerText = ""
     highScoreElement.innerText = ""
     gameScore.innerText = ""
@@ -497,64 +490,72 @@ $(document).ready(() => {
     sessionStorage.setItem(CURRENT_NAME_AND_HIGH_SCORE_ARRAY_KEY, JSON.stringify(currNameAndHighScore))
     saveGameArray[0] = 0
     sessionStorage.setItem(SAVE_GAME_ARRAY_KEY, JSON.stringify(saveGameArray))
-    // currentNameScore = []
-    // sessionStorage.setItem(CURRENT_NAME_SCORE_ARRAY_KEY, JSON.stringify(currentNameScore))
     numberOfCardsArray = []
     sessionStorage.setItem(
       NUMBER_OF_CARDS_ARRAY_KEY,
       JSON.stringify(numberOfCardsArray)
     )
-    //nameArray = []
-    //sessionStorage.setItem(NAME_ARRAY_KEY, JSON.stringify(nameArray))
+    
     const name = settingsName.value
+    // create an object to the store the username and highscore
     const highScoreObject = {
       name,
       highScore: 0,
     }
-    // const currentScoreObj = {
-    //   name,
-    //   highScore: 0,
-    //   currentScore: 0
-    // }
+    // push the object into the nameArray and save it to local storage
     nameArray.push(highScoreObject)
     localStorage.setItem(NAME_ARRAY_KEY, JSON.stringify(nameArray))
+    // push the object into the currNameAndHighScore array as well and save it to session storage
     currNameAndHighScore.push(highScoreObject)
     sessionStorage.setItem(CURRENT_NAME_AND_HIGH_SCORE_ARRAY_KEY, JSON.stringify(currNameAndHighScore))
+    // reset the currentNameScore
     currentNameScore = []
     sessionStorage.setItem(CURRENT_NAME_SCORE_ARRAY_KEY, JSON.stringify(currentNameScore))
     
     const numberOfCards = settingsCardNumber.value
+    // update the endGameArray to be the numberOfCards 
     endGameArray = [parseInt(numberOfCards)]
     sessionStorage.setItem(END_GAME_ARRAY_KEY, JSON.stringify(endGameArray))
+    // update the numberOfCardsArray to be the numberOfCards
     numberOfCardsArray = [parseInt(numberOfCards)]
     sessionStorage.setItem(
       NUMBER_OF_CARDS_ARRAY_KEY,
       JSON.stringify(numberOfCardsArray)
     )
 
+    // set the text elements to the respective name and score properties
     nameElement.innerText = name
     const obj = nameArray.find((n) => n.name === nameElement.innerText)
     highScoreElement.innerText = obj.highScore
     gameScore.innerText = currentNameScore[0]?.currentScore || 0
+    // reset the imageDataArray
     imageDataArray = []
     sessionStorage.setItem(IMAGE_DATA_ARRAY_KEY, JSON.stringify(imageDataArray))
+    // clear out everything from the imagesContainer
     while (imagesContainer.firstChild) {
       imagesContainer.removeChild(imagesContainer.firstChild)
     }
+
+    // render new images to the imagesContainer with the proper number of cards
     renderImages(numberOfCards)
+    // take the user back to the home widget
     $("#tabs").tabs("option", "active", 0)
   })
 
+  // add a click event listener to the document to scan for the new game element link 
   document.addEventListener("click", (e) => {
+    // if the click event does not match the new game element, we return immedietly 
     if (!e.target.matches("#new-game")) return
     e.preventDefault()
 
+    // reset the imageDataArray and empty the imagesContainer
     imageDataArray = []
     sessionStorage.setItem(IMAGE_DATA_ARRAY_KEY, JSON.stringify(imageDataArray))
     while (imagesContainer.firstChild) {
       imagesContainer.removeChild(imagesContainer.firstChild)
     }
 
+    // reset the rightGuesses, totalGuesses, endGameArray, and saveGameArray arrays 
     const newNumberOfCards = numberOfCardsArray[0]
     rightGuesses[0] = 0
     sessionStorage.setItem(RIGHT_GUESSES_KEY, JSON.stringify(rightGuesses))
@@ -564,11 +565,14 @@ $(document).ready(() => {
     sessionStorage.setItem(END_GAME_ARRAY_KEY, JSON.stringify(endGameArray))
     saveGameArray[0] = 0
     sessionStorage.setItem(SAVE_GAME_ARRAY_KEY, JSON.stringify(saveGameArray))
+    // render new images to the screen with the proper number of cards
     renderImages(newNumberOfCards)
   })
 })
 
+// this function handles what happens when the game ends 
 function endGame() {
+  // reset the imagesDataArray, imageCheckArray, currentNameScore array, and empty the imagesContainer
   imageDataArray = []
   sessionStorage.setItem(IMAGE_DATA_ARRAY_KEY, JSON.stringify(imageDataArray))
   imageCheckArray = []
@@ -588,10 +592,7 @@ function endGame() {
     highScoreText = baseScore + "%"
   } else {
     const obj = nameArray.find((n) => n.name === nameElement.innerText)
-    console.log(obj, "obj name object")
-  
     if (baseScore > obj.highScore) {
-      console.log("baseScore is greater than obj.highscore")
       obj.highScore = baseScore
       highScoreText = baseScore + "%"
     } else {
@@ -605,14 +606,16 @@ function endGame() {
   currentNameScore.push(baseScore + "%")
   sessionStorage.setItem(CURRENT_NAME_SCORE_ARRAY_KEY, JSON.stringify(currentNameScore))
 
+  // update the high score element text value
   highScoreElement.innerText = highScoreText
 
   const percentageValue = (score * 100).toFixed(2) + "%"
+  // update the current score element text value
   gameScore.innerText = percentageValue
-  // display screen that shows score and new game link
-
+  
+  // display screen that shows score and new game link with confetti
   const newHTML = `<p>Your score for this game was ${percentageValue}</p>\n
-                    <p>Click on "New Game" to start a new game!</p> `
+                    <p>Click on "New Game" to start a new game!</p>`
   imagesContainer.innerHTML += newHTML
   confetti({
     particleCount: 100,
@@ -621,73 +624,71 @@ function endGame() {
   })
 }
 
-function checkWin() {
-  if (endGameArray[0] == 0) {
-    endGame()
-  }
-}
-
+// this function render images to the screen
 function renderImages(numberOfCards = 48) {
-  // randomize the array (create a function to randomize the array) and then loop through it
+  // set a cards variable to the endGameArray count if it exists or the number of cards that is passed into the function
   const cards = endGameArray[0] || parseInt(numberOfCards)
-  console.log(cards)
 
-  // endGameArray[0] == numberOfCardsArray[0]
-  // need a better condition -- the user could have already flipped over cards and endGameArray[0] == numberOfCardsArray[0]
+  // if saveGameArray is not equal to 1, it means this is the initial page render and we need to render out random cards to the screen
   if (saveGameArray[0] != 1) {
-    // make the slicing random
+    
     let newImagesArray = []
 
     if (cards == 48) {
       newImagesArray = [...imagesSrcArray]
     } else {
+      // make the slicing random
       newImagesArray = randomizeOriginalArray(cards)
     }
 
-    
-
+    // randomize the newImagesArray 
     const randomizedArrayOne = randomizeArray(newImagesArray)
-    console.log(randomizedArrayOne)
+    
+    // render out images to the screen using a template
     randomizedArrayOne.forEach((image) => {
       const templateClone = template.content.cloneNode(true)
       const aTag = templateClone.querySelector(".aTag")
+      // generate a random id
       const id = generateRandomId(10)
+      // save the id to a dataset on the element 
       aTag.dataset.imageId = id
+      // create an imageData object that stores important information about the image
       const imageData = {
         imageSrc: image,
         hasBeenClicked: false,
         blank: false,
         id,
       }
+      // store the object in the imageDataArray array 
       imageDataArray.push(imageData)
       sessionStorage.setItem(IMAGE_DATA_ARRAY_KEY, JSON.stringify(imageDataArray))
       const imgTag = templateClone.querySelector("#img-item")
 
+      // set the id attribute on the a tag and the src attribute on the img tag
       aTag.setAttribute("id", image)
       imgTag.setAttribute("src", "images/back.png")
+      // append the templateClone to the imagesContainer
       imagesContainer.appendChild(templateClone)
     })
+    // set saveGameArray to be 1
     saveGameArray[0] = 1
     sessionStorage.setItem(SAVE_GAME_ARRAY_KEY, JSON.stringify(saveGameArray))
   } else {
-    console.log(imageDataArray, "image data array")
-    console.log(imageCheckArray, "image check array")
+    // once cards have been rendered to the screen on initial load, this block will run when the page is reloaded as it will save the position and attributes of the cards on the screen
     const cards = endGameArray[0] || parseInt(numberOfCards)
+    // if the user has selected to not fill out the settings form, we need to set the endGameArray here
     endGameArray[0] = cards
-    console.log(cards)
-    console.log(endGameArray)
-    // this is supposses to render new things to screen, so get rid of empty array or do clone node, query select is not available otherwise
+    
+    // loop through the imageDataArray and render the images to the screen with their proper attributes
     imageDataArray.forEach((image) => {
       const templateClone = template.content.cloneNode(true)
       const aTag = templateClone.querySelector(".aTag")
       const imgTag = templateClone.querySelector("#img-item")
       aTag.dataset.imageId = image.id
       if (image.blank) {
-        console.log("is blank")
         aTag.setAttribute("id", "")
         imgTag.setAttribute("src", "images/blank.png")
       } else if (image.hasBeenClicked) {
-        //aTag.setAttribute("id", "images/back.png")
         imgTag.setAttribute("src", image.imageSrc)
       } else {
         aTag.setAttribute("id", image.imageSrc)
@@ -700,12 +701,13 @@ function renderImages(numberOfCards = 48) {
       const obj = nameArray.find(n => n.name == currNameAndHighScore[0]?.name)
       nameElement.innerText = obj?.name || ""
       highScoreElement.innerText = obj?.highScore || ""
-      console.log(currentNameScore)
       gameScore.innerText = currentNameScore[0] || 0
     })
     
   }
 }
+
+// everything below this comment is helper functions
 
 function randomizeOriginalArray(numberOfCards) {
   let randomIndexArray = []
@@ -714,8 +716,6 @@ function randomizeOriginalArray(numberOfCards) {
   let count = length
   let check = "false"
   while (count > 0) {
-    // actually don't check index, check the value
-    // add the indexes to the randomIndexArray to check to see if we have already selected a random value from that index
     check = "false"
     const randomIndex = Math.floor(Math.random() * 47)
     const value = imagesSrcArray[randomIndex]
@@ -735,7 +735,6 @@ function randomizeOriginalArray(numberOfCards) {
       count = count - 1
     }
   }
-  console.log(newestArray, "Newest Array")
   return newestArray
 }
 
@@ -759,21 +758,3 @@ function generateRandomId(length) {
   }
   return randomId
 }
-
-// When the user clicks on a card whose back is displayed,
-// ---- the back of the card should be faded out over half a second and the front of the card should be faded in over half a second
-
-// Set up logic which only allows the user to open 2 cards --- why does it flip back to cover on click again?
-
-// When the user finds two matching cards, the cards should be hidden after one second using a sliding motion over half a second. If the cards don’t match,
-// ---- they should be faded out over half a second after two seconds and the back of the cards should be faded in over half a second
-
-// don't allow the user to click on other cards after the 3rd click untill the processes are complete
-
-// When the game ends, the user can click the New Game link to start another game
-
-// Each time the user completes a game, the user’s high score should be updated and displayed and the percentage of correct selections for the game that was just completed should be calculated and displayed.
-// ---- The high score should also be stored in local storage so it can be compared against the score for the user’s next game
-
-// When the user clicks the Save Settings button, the player name and number of cards should be saved in session storage.
-// ---- In addition, the page should be reloaded so the player’s name, the player’s high score if previous games have been played, and the correct number of cards are displayed.
